@@ -1,37 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import click
 import pandas as pd
 from sqlalchemy import create_engine
 from tqdm.auto import tqdm
-import pyarrow.parquet as pq
-import requests
-import io
 
-dtype = {
-    "VendorID": "Int64",
-    "passenger_count": "Int64",
-    "trip_distance": "float64",
-    "RatecodeID": "Int64",
-    "store_and_fwd_flag": "string",
-    "PULocationID": "Int64",
-    "DOLocationID": "Int64",
-    "payment_type": "Int64",
-    "fare_amount": "float64",
-    "extra": "float64",
-    "mta_tax": "float64",
-    "tip_amount": "float64",
-    "tolls_amount": "float64",
-    "improvement_surcharge": "float64",
-    "total_amount": "float64",
-    "congestion_surcharge": "float64"
-}
-
-parse_dates = [
-    "tpep_pickup_datetime",
-    "tpep_dropoff_datetime"
-]
 
 
 @click.command()
@@ -42,21 +13,23 @@ parse_dates = [
 @click.option('--pg-db', default='ny_taxi', help='PostgreSQL database name')
 @click.option('--year', default=2021, type=int, help='Year of the data')
 @click.option('--month', default=1, type=int, help='Month of the data')
-@click.option('--target-table', default='green_taxi_data_nov_2025', help='Target table name')
+@click.option('--target-table', default='zones', help='Target table name')
 @click.option('--chunksize', default=100000, type=int, help='Chunk size for reading CSV')
 def run(pg_user, pg_pass, pg_host, pg_port, pg_db, year, month, target_table, chunksize):
     """Ingest NYC taxi data into PostgreSQL database."""
-    url = "https://d37ci6vzurychx.cloudfront.net/trip-data/green_tripdata_2025-11.parquet"
-    response = requests.get(url)
-    file_like_object = io.BytesIO(response.content)
-    parquet_file = pq.ParquetFile(file_like_object)
+    url = 'https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_zone_lookup.csv'
 
     engine = create_engine(f'postgresql://{pg_user}:{pg_pass}@{pg_host}:{pg_port}/{pg_db}')
 
+    df_iter = pd.read_csv(
+        url,
+        iterator=True,
+        chunksize=chunksize,
+    )
+
     first = True
 
-    for batch in parquet_file.iter_batches(batch_size=chunksize):
-        df_chunk = batch.to_pandas()
+    for df_chunk in tqdm(df_iter):
         if first:
             df_chunk.head(0).to_sql(
                 name=target_table,
@@ -73,7 +46,3 @@ def run(pg_user, pg_pass, pg_host, pg_port, pg_db, year, month, target_table, ch
 
 if __name__ == '__main__':
     run()
-
-
-
-
