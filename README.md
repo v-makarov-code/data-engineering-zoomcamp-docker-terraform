@@ -1,2 +1,26 @@
-# data-engineering-zoomcamp-docker-terraform
-First chapter of data engineering zoomcamp course. Workshop Codespaces.
+# Ввод данных для локальной базы данных PostrgreSQL 
+
+## Обзор проекта
+
+Python скрипт для ввода данных в локально развернутую базу данных PostgreSQL
+
+**Цель**: Наполнить базу данных PostgreSQL данными NYC yellow/green taxi за 2025 год для дальнейшей аналитики при помощи SQL запросов. 
+
+**Задачи**: 
+
+- Настройка вирутального окружения Python при помощи uv
+- Запуск PostgreSQL при помощи Docker контейнера
+- Ввод NY Taxi Dataset в базу данных при помощи SQLAlchemy
+- Докеризация полученного скрипта
+- Настройка pgAdmin
+- Настройка Docker Compose при помощи .yaml файла
+
+## Стек 
+
+- Python(Pandas, SQLAlchemy)
+- Docker
+- PostgreSQL
+
+## Вывод и результаты
+
+Развернута локальная база данных PostgreSQL с информацией о поездках NY такси за 2025 год.
